@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">Mes budgets</h2>
+        <p class="text-muted mb-0">Suivez vos limites de dépenses par catégorie</p>
+    </div>
+    <a href="{{ url_for('budget.ajouter') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Ajouter
+    </a>
+</div>
+
+<div class="row g-3">
+    {% if budgets %}
+        {% for b in budgets %}
+        <div class="col-md-6">
+            <div class="card p-4">
+
+                <!-- En-tête -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ b.icone }} {{ b.categorie }}</h5>
+                        <small class="text-muted">
+                            {% set mois_noms = ['', 'Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] %}
+                            {{ mois_noms[b.mois] }} {{ b.annee }}
+                        </small>
+                    </div>
+                    <span class="badge bg-{{ b.statut }} fs-6">{{ b.pourcentage }}%</span>
+                </div>
+
+                <!-- Barre de progression -->
+                <div class="progress mb-3" style="height: 12px; border-radius: 6px;">
+                    <div class="progress-bar bg-{{ b.statut }}"
+                         role="progressbar"
+                         style="width: {{ b.pourcentage }}%; border-radius: 6px;"
+                         aria-valuenow="{{ b.pourcentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+
+                <!-- Détails montants -->
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <p class="text-muted mb-0" style="font-size:0.75rem;">Dépensé</p>
+                        <p class="fw-bold text-danger mb-0">{{ "%.0f"|format(b.depenses_reelles) }}</p>
+                        <p class="text-muted mb-0" style="font-size:0.7rem;">FCFA</p>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-0" style="font-size:0.75rem;">Limite</p>
+                        <p class="fw-bold mb-0" style="color:#7c3aed;">{{ "%.0f"|format(b.limite) }}</p>
+                        <p class="text-muted mb-0" style="font-size:0.7rem;">FCFA</p>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-0" style="font-size:0.75rem;">Restant</p>
+                        <p class="fw-bold mb-0 {% if b.restant < 0 %}text-danger{% else %}text-success{% endif %}">
+                            {{ "%.0f"|format(b.restant) }}
+                        </p>
+                        <p class="text-muted mb-0" style="font-size:0.7rem;">FCFA</p>
+                    </div>
+                </div>
+
+                <!-- Message statut -->
+                {% if b.pourcentage >= 100 %}
+                <div class="alert alert-danger py-2 mb-3" style="font-size:0.82rem;">
+                    🔴 Budget dépassé de {{ "%.0f"|format(-b.restant) }} FCFA !
+                </div>
+                {% elif b.pourcentage >= 75 %}
+                <div class="alert alert-warning py-2 mb-3" style="font-size:0.82rem;">
+                    ⚠️ Attention ! Vous avez utilisé {{ b.pourcentage }}% de votre budget.
+                </div>
+                {% else %}
+                <div class="alert alert-success py-2 mb-3" style="font-size:0.82rem;">
+                    ✅ Budget sous contrôle. Il vous reste {{ "%.0f"|format(b.restant) }} FCFA.
+                </div>
+                {% endif %}
+
+                <!-- Bouton supprimer -->
+                <div class="text-end">
+                    <a href="{{ url_for('budget.supprimer', id=b.id) }}"
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Supprimer ce budget ?')">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="card p-5 text-center text-muted">
+            <i class="bi bi-wallet2 fs-1"></i>
+            <p class="mt-2">Aucun budget défini.<br>
+            <a href="{{ url_for('budget.ajouter') }}">Créez votre premier budget</a></p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

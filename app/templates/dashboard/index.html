@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="fw-bold">Bonjour, {{ current_user.username }} 👋</h2>
+    <p class="text-muted">Voici un aperçu de vos finances</p>
+</div>
+
+<!-- Cartes KPI -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="background:#dcfce7; border-radius:10px; padding:12px;">
+                    <i class="bi bi-arrow-up-circle-fill text-success fs-4"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-0" style="font-size:0.8rem;">Total Revenus</p>
+                    <h4 class="fw-bold mb-0 text-success">{{ "%.0f"|format(revenus) }} FCFA</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="background:#fee2e2; border-radius:10px; padding:12px;">
+                    <i class="bi bi-arrow-down-circle-fill text-danger fs-4"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-0" style="font-size:0.8rem;">Total Dépenses</p>
+                    <h4 class="fw-bold mb-0 text-danger">{{ "%.0f"|format(depenses) }} FCFA</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="background:#ede9fe; border-radius:10px; padding:12px;">
+                    <i class="bi bi-wallet-fill fs-4" style="color:#7c3aed;"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-0" style="font-size:0.8rem;">Solde Net</p>
+                    <h4 class="fw-bold mb-0" style="color:#7c3aed;">{{ "%.0f"|format(solde) }} FCFA</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphiques -->
+<div class="row g-3 mb-4">
+    <div class="col-md-5">
+        <div class="card p-3">
+            <h6 class="fw-bold mb-2">Revenus vs Dépenses</h6>
+            {{ graph1|safe }}
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card p-3">
+            <h6 class="fw-bold mb-2">Dépenses par catégorie</h6>
+            {{ graph2|safe }}
+        </div>
+    </div>
+</div>
+
+<div class="card p-3 mb-4">
+    <h6 class="fw-bold mb-2">Évolution du solde</h6>
+    {{ graph3|safe }}
+</div>
+
+<!-- Dernières transactions -->
+<div class="card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Dernières transactions</h5>
+        <a href="{{ url_for('transactions.ajouter') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Ajouter
+        </a>
+    </div>
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Titre</th>
+                    <th>Catégorie</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.titre }}</td>
+                    <td><span class="badge bg-secondary">{{ t.categorie }}</span></td>
+                    <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
+                    <td class="fw-bold {% if t.type == 'revenu' %}text-success{% else %}text-danger{% endif %}">
+                        {% if t.type == 'revenu' %}+{% else %}-{% endif %}
+                        {{ "%.0f"|format(t.montant) }} FCFA
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted">
+        <i class="bi bi-inbox fs-1"></i>
+        <p class="mt-2">Aucune transaction pour l'instant.<br>
+        <a href="{{ url_for('transactions.ajouter') }}">Ajoutez votre première transaction</a></p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">Mes transactions</h2>
+        <p class="text-muted mb-0">Historique complet de vos mouvements financiers</p>
+    </div>
+    <a href="{{ url_for('transactions.ajouter') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Ajouter
+    </a>
+</div>
+
+<div class="card p-4">
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Titre</th>
+                    <th>Type</th>
+                    <th>Catégorie</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td class="fw-semibold">{{ t.titre }}</td>
+                    <td>
+                        {% if t.type == 'revenu' %}
+                            <span class="badge" style="background:#dcfce7; color:#16a34a;">Revenu</span>
+                        {% else %}
+                            <span class="badge" style="background:#fee2e2; color:#dc2626;">Dépense</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ t.categorie }}</span></td>
+                    <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
+                    <td class="fw-bold {% if t.type == 'revenu' %}text-success{% else %}text-danger{% endif %}">
+                        {% if t.type == 'revenu' %}+{% else %}-{% endif %}
+                        {{ "%.0f"|format(t.montant) }} FCFA
+                    </td>
+                    <td>
+                        <a href="{{ url_for('transactions.supprimer', id=t.id) }}"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Supprimer cette transaction ?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1"></i>
+        <p class="mt-2">Aucune transaction enregistrée.<br>
+        <a href="{{ url_for('transactions.ajouter') }}">Ajoutez votre première transaction</a></p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
